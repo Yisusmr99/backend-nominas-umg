@@ -15,6 +15,11 @@ services:
     depends_on:
       - mysql
       - redis
+    command: >
+      sh -c "composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader &&
+          php artisan key:generate &&
+          chmod -R 777 storage bootstrap/cache &&
+          php-fpm"
 
   nginx:
     image: nginx:latest
@@ -31,7 +36,7 @@ services:
       - app
 
   mysql:
-    image: mysql:8
+    image: mysql
     container_name: laravel_mysql
     restart: unless-stopped
     environment:
