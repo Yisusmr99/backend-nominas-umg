@@ -32,14 +32,13 @@ return new class extends Migration
 
         Schema::create('employee', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->integer('dpi');
             $table->integer('nit');
             $table->string('position');
             $table->double('salary');
             $table->date('hire_date');
-            $table->date('termination_date');
+            $table->date('termination_date')->nullable();
             $table->boolean('is_active')->default(true);
             $table->foreignId('contract_type_id')->constrained('contract_types')->onDelete('cascade');
             $table->timestamps();
@@ -78,9 +77,9 @@ return new class extends Migration
 
         Schema::create('bonus', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->double('percentage');
-            $table->double('fixed_amount');
+            $table->string('bonu_name');
+            $table->double('bonu_percentage');
+            $table->double('bonu_fixed_amount');
             $table->timestamps();
         });
 
@@ -94,9 +93,9 @@ return new class extends Migration
 
         Schema::create('deduction', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->double('percentage');
-            $table->double('fixed_amount');
+            $table->string('deduction_name');
+            $table->double('deduction_percentage');
+            $table->double('deduction_fixed_amount');
             $table->timestamps();
         });
 
@@ -114,16 +113,19 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('deduction');
-        Schema::dropIfExists('payroll_deduction');
-        Schema::dropIfExists('bonus');
-        Schema::dropIfExists('payroll_bonus');
-        Schema::dropIfExists('payroll');
-        Schema::dropIfExists('payroll_type');
-        Schema::dropIfExists('attendances');
-        Schema::dropIfExists('employee');
-        Schema::dropIfExists('contract_types');
+        // Drop dependent (child) tables first
         Schema::dropIfExists('role_has_permission');
+        Schema::dropIfExists('attendances');
+        Schema::dropIfExists('payroll_bonus'); //no tiene modelo
+        Schema::dropIfExists('payroll_deduction');
+        Schema::dropIfExists('payroll');
+        Schema::dropIfExists('employee');
+        
+        // Drop parent tables next
         Schema::dropIfExists('permissions');
+        Schema::dropIfExists('contract_types');
+        Schema::dropIfExists('payroll_type');
+        Schema::dropIfExists('bonus');
+        Schema::dropIfExists('deduction');
     }
 };
