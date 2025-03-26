@@ -14,27 +14,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-
         $this->call([
-            RoleSeeder::class
+            RoleSeeder::class,
+            ContractTypeSeeder::class,
+            PayrollTypeSeeder::class,
+            DeductionSeeder::class,
+            BonuSeeder::class,
         ]);
 
         User::firstOrCreate(
-            ['email' => 'superadmin@example.com'],
+            [ 'email' => 'superadmin@example.com' ],
             [
-            'username' => 'superadmin',
-            'name' => 'Super',
-            'last_name' => 'Admin',
-            'password' => bcrypt('password'),
-            'role_id' => 1,
-            'is_active' => 1,
-            ]
-        );
-        
-        ContractType::firstOrCreate(
-            [ 'name' => 'Quincenal' ],
-            [
-                'name' => 'Quincenal',
+                'username' => 'superadmin',
+                'name' => 'Super',
+                'last_name' => 'Admin',
+                'password' => bcrypt('password'),
+                'role_id' => 1,
+                'is_active' => 1,
             ]
         );
     }
