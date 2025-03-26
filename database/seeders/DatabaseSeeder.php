@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\ContractType;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -13,11 +14,28 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            RoleSeeder::class
         ]);
+
+        User::firstOrCreate(
+            ['email' => 'superadmin@example.com'],
+            [
+            'username' => 'superadmin',
+            'name' => 'Super',
+            'last_name' => 'Admin',
+            'password' => bcrypt('password'),
+            'role_id' => 1,
+            'is_active' => 1,
+            ]
+        );
+        
+        ContractType::firstOrCreate(
+            [ 'name' => 'Quincenal' ],
+            [
+                'name' => 'Quincenal',
+            ]
+        );
     }
 }
