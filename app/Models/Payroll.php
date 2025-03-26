@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Payroll extends Model
 {
     use HasFactory;
+    protected $table = 'payroll';
 
     protected $fillable = [
         'employee_id',

@@ -78,8 +78,8 @@ return new class extends Migration
         Schema::create('bonus', function (Blueprint $table) {
             $table->id();
             $table->string('bonu_name');
-            $table->double('bonu_percentage');
-            $table->double('bonu_fixed_amount');
+            $table->double('bonu_percentage')->nullable();
+            $table->double('bonu_fixed_amount')->nullable();
             $table->timestamps();
         });
 
@@ -94,8 +94,8 @@ return new class extends Migration
         Schema::create('deduction', function (Blueprint $table) {
             $table->id();
             $table->string('deduction_name');
-            $table->double('deduction_percentage');
-            $table->double('deduction_fixed_amount');
+            $table->double('deduction_percentage')->nullable();
+            $table->double('deduction_fixed_amount')->nullable();
             $table->timestamps();
         });
 

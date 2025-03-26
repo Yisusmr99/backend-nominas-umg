@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class PayrollBonu extends Model
 {
     use HasFactory;
+    protected $table = 'payroll_bonus';
 
     protected $fillable = [
         'payroll_id',

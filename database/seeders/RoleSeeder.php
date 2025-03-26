@@ -13,8 +13,8 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        Rol::updateOrCreate(['name' => 'admin']);
-        Rol::updateOrCreate(['name' => 'manager']);
-        Rol::updateOrCreate(['name' => 'employee']);
+        Rol::updateOrCreate(['name' => 'Administrador']);
+        Rol::updateOrCreate(['name' => 'Catedratico']);
+        Rol::updateOrCreate(['name' => 'Gerente']);
     }
 }

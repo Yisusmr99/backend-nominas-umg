@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Bonu extends Model
 {
     use HasFactory;
+    protected $table = 'bonus';
 
     protected $fillable = [
         'bonu_name',
