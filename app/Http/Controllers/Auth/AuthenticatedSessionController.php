@@ -8,46 +8,57 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\ApiResponse;
 
 class AuthenticatedSessionController extends Controller
 {
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): JsonResponse|Response
+    public function store(LoginRequest $request): JsonResponse
     {
-        $request->authenticate();
+        $authResponse = $request->authenticate();
+        $responseData = json_decode($authResponse->getContent(), true);
         
-        // Obtenemos el usuario autenticado directamente de Auth
+        if (!$responseData['result']) {
+            return $authResponse;
+        }
+        
         $user = Auth::user();
-        
-        // Generar token para APIs
         $token = $user->createToken('api-token')->plainTextToken;
 
-        // Retornar el token en la respuesta
-        return response()->json(['token' => $token, 'user' => $user]);
+        return ApiResponse::success([
+            'user' => $user,
+            'token' => $token
+        ], 'Inicio de sesión exitoso');
     }
 
     /**
      * Destroy an authenticated session.
      */
-    public function destroy(Request $request): JsonResponse|Response
+    public function destroy(Request $request): JsonResponse
     {
         try {
-            // Revocar el token actual que se está usando para la solicitud
             if ($request->user()) {
                 $request->user()->currentAccessToken()->delete();
                 
-                return response()->json([
-                    'message' => 'Logged out successfully',
-                    'token_deleted' => true,
-                    'tokens_remaining' => $request->user()->tokens()->count()
-                ]);
+                return ApiResponse::success(
+                    ['tokens_remaining' => $request->user()->tokens()->count()],
+                    'Sesión cerrada exitosamente'
+                );
             }
 
-            return response()->json(['message' => 'No active session found'], 401);
+            return ApiResponse::error(
+                null,
+                'No se encontró una sesión activa',
+                401
+            );
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error during logout: ' . $e->getMessage()], 500);
+            return ApiResponse::error(
+                null,
+                'Error durante el cierre de sesión: ' . $e->getMessage(),
+                500
+            );
         }
     }
 }

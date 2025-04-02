@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Requests\Auth;
+namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Helpers\ApiResponse;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
-class UserRequest extends FormRequest
+class EditRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,21 +25,14 @@ class UserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $validate = [
-            'username' => ['required', 'string', 'max:255', 'unique:users'],
+        $userId = $this->route('user'); // Obtiene el ID del usuario de la ruta
+        $validate =  [
+            'username' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($userId)],
             'name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($userId)],
             'role_id' => ['required', 'integer'],
-            // informacion para la tabla employee
-            'dpi' => ['required', 'int'],
-            'nit' => ['required', 'int'],
-            'position' => ['required', 'string', 'max:255'],
-            'salary' => ['required', 'int'],
-            'hire_date' => ['required', 'date'],
-            'contract_type_id' => ['required', 'int'],
         ];
-        
         return $validate;
     }
 
@@ -60,20 +54,5 @@ class UserRequest extends FormRequest
         throw new HttpResponseException(
             ApiResponse::error($validator->errors(), 'Error de validación', 422)
         );
-    }
-
-    /**
-     * Get the validation messages that apply to the request.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'email.unique' => 'El correo electrónico ya está registrado.',
-            'username.unique' => 'El nombre de usuario ya está registrado.',
-            'email.required' => 'El correo electrónico es obligatorio.',
-            'email.email' => 'El correo electrónico debe ser válido.',
-        ];
     }
 }
