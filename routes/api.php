@@ -1,14 +1,19 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-// importar las rutas del archivo auth.php
+use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Employee\EmployeeController;
 require __DIR__ . '/auth.php';
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
-});
 
 Route::get('healthcheck', function () {
     return response()->json(['message' => 'API is running']);
+});
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/users', [UserController::class, 'all']);
+    Route::put('/user/{user}', [UserController::class, 'update']);
+
+    Route::put('/employee/{employee}', [EmployeeController::class, 'update']);
 });

@@ -3,6 +3,9 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Helpers\ApiResponse;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -23,5 +26,15 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
+            return ApiResponse::error(null, 'Token no válido o usuario no autenticado', 401);
+        });
+
+        $exceptions->render(function (ModelNotFoundException $e, $request) {
+            return ApiResponse::error(null, 'Recurso no encontrado', 404);
+        });
+    
+        $exceptions->render(function (NotFoundHttpException $e, $request) {
+            return ApiResponse::error(null, 'Ruta o recurso no encontrado', 404);
+        });
     })->create();

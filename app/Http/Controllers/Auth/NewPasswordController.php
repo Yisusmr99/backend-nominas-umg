@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
+use App\Helpers\ApiResponse;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ResetPasswordMail;
 
 class NewPasswordController extends Controller
 {
@@ -19,35 +23,29 @@ class NewPasswordController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): JsonResponse
-    {
-        $request->validate([
-            'token' => ['required'],
-            'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user) use ($request) {
-                $user->forceFill([
-                    'password' => Hash::make($request->string('password')),
-                    'remember_token' => Str::random(60),
-                ])->save();
-
-                event(new PasswordReset($user));
-            }
-        );
-
-        if ($status != Password::PASSWORD_RESET) {
-            throw ValidationException::withMessages([
-                'email' => [__($status)],
+    public function store(Request $request): JsonResponse{
+        try {
+            $request->validate([
+                'email' => 'required|email'
             ]);
-        }
 
-        return response()->json(['status' => __($status)]);
+            $user = User::where('email', $request->email)->first();
+            
+            if (!$user) {
+                return ApiResponse::error('Usuario no encontrado.', 404);
+            }
+
+            $newPassword = Str::random(8);
+            $user->password = Hash::make($newPassword);
+            $user->save();
+
+            // Send email with new password
+            Mail::to($user->email)->send(new ResetPasswordMail($user, $newPassword));
+            return ApiResponse::success('Contraseña restablecida correctamente. Se ha enviado un correo con la nueva contraseña.', 200);
+        } catch (ValidationException $e) {
+            return ApiResponse::error($e->getMessage(), 422);
+        } catch (\Exception $e) {
+            return ApiResponse::error('An error occurred while resetting password', 500);
+        }
     }
 }

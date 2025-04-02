@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Helpers\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -35,21 +37,31 @@ class LoginRequest extends FormRequest
     /**
      * Attempt to authenticate the request's credentials.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @return JsonResponse
      */
-    public function authenticate(): void
+    public function authenticate(): JsonResponse
     {
-        $this->ensureIsNotRateLimited();
+        try {
+            if (!Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+                return ApiResponse::error(
+                    null,
+                    'Credenciales inválidas',
+                    401
+                );
+            }
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+            return ApiResponse::success(
+                Auth::user(),
+                'Inicio de sesión exitoso'
+            );
 
-            throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
-            ]);
+        } catch (\Exception $e) {
+            return ApiResponse::error(
+                null,
+                'Error en el servidor: ' . $e->getMessage(),
+                500
+            );
         }
-
-        RateLimiter::clear($this->throttleKey());
     }
 
     /**
@@ -59,7 +71,7 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 10)) {
             return;
         }
 
