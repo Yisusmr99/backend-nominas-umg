@@ -13,8 +13,7 @@ class PayrollTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        PayrollType::updateOrCreate(['name' => 'Efectivo']);
-        PayrollType::updateOrCreate(['name' => 'Cheque']);
-        PayrollType::updateOrCreate(['name' => 'Transferencia']);
+        PayrollType::updateOrCreate(['name' => 'Ordinaria']);
+        PayrollType::updateOrCreate(['name' => 'Extraordinaria']);
     }
 }
