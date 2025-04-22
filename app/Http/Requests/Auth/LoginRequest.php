@@ -46,7 +46,7 @@ class LoginRequest extends FormRequest
                 return ApiResponse::error(
                     null,
                     'Credenciales inválidas',
-                    401
+                    406
                 );
             }
 

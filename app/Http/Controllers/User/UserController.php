@@ -16,7 +16,7 @@ class UserController extends Controller
     public function all(): JsonResponse
     {
         try {
-            $users = User::with('employee')->get();
+            $users = User::with('employee', 'role')->get();
             return ApiResponse::success(
                 $users,
                 'Usuarios obtenidos exitosamente'

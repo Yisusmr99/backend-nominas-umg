@@ -12,7 +12,7 @@ class Bonu extends Model
 
     protected $fillable = [
         'bonu_name',
-        'bonu_amount',
+        'bonu_percentage',
         'bonu_fixed_amount',
     ];
 
