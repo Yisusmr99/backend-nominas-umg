@@ -26,7 +26,7 @@ class ContractTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('payroll_type')->ignore($this->route('payroll_type'))],
+            'name' => ['required', 'string', 'max:255', Rule::unique('contract_types')->ignore($this->route('payroll_type'))],
         ];
     }
 
