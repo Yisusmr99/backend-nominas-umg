@@ -35,7 +35,7 @@ class UserController extends Controller
         try {
             $user->update($request->all());
             return ApiResponse::success(
-                $user,
+                $user->load('employee', 'role'),
                 'Usuario actualizado exitosamente'
             );
         } catch (\Exception $e) {
@@ -45,5 +45,24 @@ class UserController extends Controller
                 500
             );
         } 
+    }
+
+    public function low(Request $request, User $user): JsonResponse
+    {
+        try {
+            $user->update(['is_active' => false]);
+            $user->employee()->update(['is_active' => false]);
+            $user->employee()->update(['termination_date' => now()]);
+            return ApiResponse::success(
+                $user->load('employee', 'role'),
+                'Usuario dado de baja exitosamente'
+            );
+        } catch (\Exception $e) {
+            return ApiResponse::error(
+                null,
+                'Error al dar de baja usuario: ' . $e->getMessage(),
+                500
+            );
+        }
     }
 }

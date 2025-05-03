@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\WelcomeEmail;
 use Illuminate\Support\Str;
 use Illuminate\Http\JsonResponse;
+use App\Helpers\ApiResponse;
 
 class RegisteredUserController extends Controller
 {
@@ -61,7 +62,10 @@ class RegisteredUserController extends Controller
             }
             DB::commit();
             $this->sendEmail($user, $plainPassword);
-            return response()->json(['message' => 'User created successfully'], 201);
+            return ApiResponse::success(
+                User::with('employee', 'role')->find($user->id),
+                'Usuario creado exitosamente'
+            );
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json(['message' => 'Error creating user: ' . $th->getMessage()], 500);

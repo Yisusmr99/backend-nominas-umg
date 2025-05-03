@@ -9,6 +9,9 @@ use App\Http\Controllers\Deduction\DeductionController;
 use App\Http\Controllers\Bonus\BonusController;
 require __DIR__ . '/auth.php';
 
+use App\Models\Rol;
+use App\Helpers\ApiResponse;
+
 
 Route::get('healthcheck', function () {
     return response()->json(['message' => 'API is running']);
@@ -18,6 +21,7 @@ Route::get('healthcheck', function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users', [UserController::class, 'all']);
     Route::put('/user/{user}', [UserController::class, 'update']);
+    Route::put('/user/low/{user}', [UserController::class, 'low']);
 
     Route::put('/employee/{employee}', [EmployeeController::class, 'update']);
 
@@ -32,4 +36,11 @@ Route::middleware('auth:sanctum')->group(function () {
         
     Route::resource('bonus', BonusController::class)
         ->only(['index', 'store', 'show', 'update', 'destroy']);
+
+    Route::get('roles', function () {
+        return ApiResponse::success(
+            Rol::all(),
+            'Usuarios obtenidos exitosamente'
+        );
+    });
 });

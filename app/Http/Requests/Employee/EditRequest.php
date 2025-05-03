@@ -31,7 +31,7 @@ class EditRequest extends FormRequest
             'position' => ['required', 'string', 'max:255'],
             'salary' => ['required', 'numeric'],
             'termination_date' => ['nullable', 'date'],
-            'is_active' => ['required', 'boolean'],
+            'is_active' => ['nullable', 'boolean'],
             'contract_type_id' => ['required', 'integer', 'exists:contract_types,id'],
         ];
     }
