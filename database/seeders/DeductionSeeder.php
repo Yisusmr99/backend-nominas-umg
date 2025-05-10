@@ -21,12 +21,6 @@ class DeductionSeeder extends Seeder
             ]
         );
         Deduction::firstOrCreate(
-            [ 'deduction_name' => 'IRTRA' ],
-            [
-                'deduction_percentage' => '1.00',
-                'deduction_fixed_amount' => null,
-            ]
-        );Deduction::firstOrCreate(
             [ 'deduction_name' => 'ISR' ],
             [
                 'deduction_percentage' => '5.00',

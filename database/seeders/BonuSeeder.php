@@ -14,22 +14,6 @@ class BonuSeeder extends Seeder
     public function run(): void
     {
         Bonu::firstOrCreate(
-            [ 'bonu_name' => 'Bono 14' ],
-            [
-                'bonu_percentage' => '100',
-                'bonu_fixed_amount' => null,
-            ]
-        );
-
-        Bonu::firstOrCreate(
-            [ 'bonu_name' => 'Aguinaldo' ],
-            [
-                'bonu_percentage' => '100',
-                'bonu_fixed_amount' => null,
-            ]
-        );
-
-        Bonu::firstOrCreate(
             [ 'bonu_name' => 'Bono Incentivo Decreto 37-2001' ],
             [
                 'bonu_percentage' => null,

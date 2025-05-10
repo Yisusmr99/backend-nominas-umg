@@ -70,8 +70,8 @@ return new class extends Migration
             $table->double('net_salary');
             // campo estado, debe ser un enum que tenga los valores de 'pendiente', 'pagado', 'anulado'
             $table->enum('status', ['pendiente', 'pagado', 'anulado']);
-            $table->date('payment_date');
-            $table->foreignId('approved_by')->constrained('users')->onDelete('cascade');
+            $table->date('payment_date')->nullable();
+            $table->foreignId('approved_by')->constrained('users')->onDelete('cascade')->nullable();
             $table->timestamps();
         });
 

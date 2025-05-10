@@ -24,7 +24,7 @@ class AuthenticatedSessionController extends Controller
             return $authResponse;
         }
         
-        $user = Auth::user();
+        $user = Auth::user()->load('role');
         $token = $user->createToken('api-token')->plainTextToken;
 
         return ApiResponse::success([
