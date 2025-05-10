@@ -7,6 +7,7 @@ use App\Http\Controllers\PayrollType\PayrollTypeController;
 use App\Http\Controllers\ContractType\ContractTypeController;
 use App\Http\Controllers\Deduction\DeductionController;
 use App\Http\Controllers\Bonus\BonusController;
+use App\Http\Controllers\Payroll\PayrollController;
 require __DIR__ . '/auth.php';
 
 use App\Models\Rol;
@@ -43,4 +44,10 @@ Route::middleware('auth:sanctum')->group(function () {
             'Usuarios obtenidos exitosamente'
         );
     });
+
+    Route::resource('payroll', PayrollController::class)
+    ->only(['index', 'store']);
+    Route::post('payroll/pay', [PayrollController::class, 'pay']);
+    Route::get('payroll/employee/{employeeId}', [PayrollController::class, 'showByEmployee']);
+    
 });

@@ -23,6 +23,6 @@ class PayrollBonu extends Model
 
     public function bonus()
     {
-        return $this->belongsTo(Bonus::class);
+        return $this->belongsTo(Bonu::class);
     }
 }

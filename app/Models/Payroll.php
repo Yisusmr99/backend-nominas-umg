@@ -37,4 +37,14 @@ class Payroll extends Model
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
+
+    public function payrollBonu()
+    {
+        return $this->hasMany(PayrollBonu::class);
+    }
+
+    public function payrollDeduction()
+    {
+        return $this->hasMany(PayrollDeduction::class);
+    }
 }
