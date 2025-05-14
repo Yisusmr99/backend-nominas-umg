@@ -8,6 +8,9 @@ use App\Http\Controllers\ContractType\ContractTypeController;
 use App\Http\Controllers\Deduction\DeductionController;
 use App\Http\Controllers\Bonus\BonusController;
 use App\Http\Controllers\Payroll\PayrollController;
+use App\Http\Controllers\Reports\ReportsController;
+use App\Http\Controllers\PerformanceEvaluation\PerformanceEvaluationController;
+
 require __DIR__ . '/auth.php';
 
 use App\Models\Rol;
@@ -25,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/user/low/{user}', [UserController::class, 'low']);
 
     Route::put('/employee/{employee}', [EmployeeController::class, 'update']);
+    Route::get('/employee', [EmployeeController::class, 'index']);
 
     Route::resource('payroll_type', PayrollTypeController::class)
         ->only(['index', 'store', 'show', 'update', 'destroy']);
@@ -50,4 +54,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('payroll/pay', [PayrollController::class, 'pay']);
     Route::get('payroll/employee/{employeeId}', [PayrollController::class, 'showByEmployee']);
     
+
+    Route::get('report/payroll', [ReportsController::class, 'index']);
+    Route::resource('performance-evaluation', PerformanceEvaluationController::class)
+        ->only(['index', 'store']);
+
 });
+
+Route::get('/reports/export', [ReportsController::class, 'exportExcel']);

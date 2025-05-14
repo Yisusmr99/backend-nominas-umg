@@ -44,14 +44,14 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('attendances', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('employee_id')->constrained('employee')->onDelete('cascade');
-            $table->date('work_date');
-            $table->integer('worked_hours');
-            $table->double('overtime_hours');
-            $table->timestamps();
-        });
+        // Schema::create('attendances', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->foreignId('employee_id')->constrained('employee')->onDelete('cascade');
+        //     $table->date('work_date');
+        //     $table->integer('worked_hours');
+        //     $table->double('overtime_hours');
+        //     $table->timestamps();
+        // });
 
         Schema::create('payroll_type', function (Blueprint $table) {
             $table->id();
