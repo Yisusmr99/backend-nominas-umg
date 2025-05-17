@@ -16,5 +16,6 @@ class PayrollTypeSeeder extends Seeder
         PayrollType::updateOrCreate(['name' => 'Pago de honorarios']);
         PayrollType::updateOrCreate(['name' => 'Bono 14']);
         PayrollType::updateOrCreate(['name' => 'Aguinaldo']);
+        PayrollType::updateOrCreate(['name' => 'Liquidación']);
     }
 }

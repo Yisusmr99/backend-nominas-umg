@@ -20,5 +20,19 @@ class BonuSeeder extends Seeder
                 'bonu_fixed_amount' => '250.00',
             ]
         );
+        Bonu::firstOrCreate(
+            [ 'bonu_name' => 'Bono 14 liquidacion' ],
+            [
+                'bonu_percentage' => 0,
+                'bonu_fixed_amount' => 0,
+            ]
+        );
+        Bonu::firstOrCreate(
+            [ 'bonu_name' => 'Aguinaldo liquidacion' ],
+            [
+                'bonu_percentage' => 0,
+                'bonu_fixed_amount' => 0,
+            ]
+        );
     }
 }
