@@ -10,6 +10,7 @@ use App\Http\Controllers\Bonus\BonusController;
 use App\Http\Controllers\Payroll\PayrollController;
 use App\Http\Controllers\Reports\ReportsController;
 use App\Http\Controllers\PerformanceEvaluation\PerformanceEvaluationController;
+use App\Http\Controllers\Vacation\VacationController;
 
 require __DIR__ . '/auth.php';
 
@@ -59,6 +60,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('performance-evaluation', PerformanceEvaluationController::class)
         ->only(['index', 'store']);
 
+    Route::resource('vacation', VacationController::class)
+    ->only(['index', 'store']);
+    Route::get('vacation/employee/{employeeId}', [VacationController::class, 'getApplicationsByEmployee']);
+    Route::put('vacation/approve/{id}', [VacationController::class, 'approveRequest']);
+    Route::post('vacation/add-vacation', [VacationController::class, 'addVacationBalanceAllEmployees']);
+    Route::get('vacation/balance/{employeeId}', [VacationController::class, 'getVacationBalance']);
+    Route::put('vacation/decline/{id}', [VacationController::class, 'declineRequest']);
 });
 
 Route::get('/reports/export', [ReportsController::class, 'exportExcel']);

@@ -34,5 +34,12 @@ class BonuSeeder extends Seeder
                 'bonu_fixed_amount' => 0,
             ]
         );
+        Bonu::firstOrCreate(
+            [ 'bonu_name' => 'Pago de vacaciones' ],
+            [
+                'bonu_percentage' => 0,
+                'bonu_fixed_amount' => 0,
+            ]
+        );
     }
 }
