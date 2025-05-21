@@ -31,4 +31,14 @@ class Employee extends Model
     {
         return $this->belongsTo(ContractType::class);
     }
+
+    // add relationships for vacation and vacation_balance
+    public function vacation()
+    {
+        return $this->hasMany(Vacation::class);
+    }
+    public function vacationBalance()
+    {
+        return $this->hasOne(VacationBalance::class);
+    }
 }

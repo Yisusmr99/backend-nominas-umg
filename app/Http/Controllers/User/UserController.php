@@ -67,6 +67,9 @@ class UserController extends Controller
 
             $employee = $user->employee;
             //--------------------------------------------------------------------------
+            // obtener vacaciones pendientes del empleado
+            $pending_vacations = $this->getPendingVacations($employee);
+            //--------------------------------------------------------------------------
             // obtener el bono 14 pendiente del empleado
             $pending_bonus_14 = $this->getPendingBonus($employee, $end_date);
             //--------------------------------------------------------------------------
@@ -75,7 +78,8 @@ class UserController extends Controller
             //--------------------------------------------------------------------------
             // obtener salario pendiente del empleado
             $pending_salary = $this->getPendigSalary(
-                $employee, $end_date, $pending_aguinaldo, $pending_bonus_14
+                $employee, $end_date, $pending_aguinaldo, $pending_bonus_14,
+                $pending_vacations
             );
             //--------------------------------------------------------------------------
 
@@ -94,7 +98,7 @@ class UserController extends Controller
         }
     }
 
-    private function getPendigSalary($employee, $end_date, $pending_aguinaldo, $pending_bonus_14){
+    private function getPendigSalary($employee, $end_date, $pending_aguinaldo, $pending_bonus_14, $pending_vacations){
         // obtener el ultimo salario del empleado para saber si necesitamos pagarle los dias faltantes laborados
         $last_payment = Payroll::where('employee_id', $employee->id)
             ->where('payroll_type_id', 1)
@@ -172,6 +176,9 @@ class UserController extends Controller
             if($pending_bonus_14 > 0){
                 $this->createPayrollBonu($payroll->id, 2, $pending_bonus_14);
             }
+            if($pending_vacations > 0){
+                $this->createPayrollBonu($payroll->id, 4, $pending_vacations);
+            }
         }
 
         return $pending_salary;
@@ -247,5 +254,20 @@ class UserController extends Controller
             $panding_aguinaldo = round($panding_aguinaldo, 2);
         }
         return $panding_aguinaldo;
+    }
+
+    private function getPendingVacations($employee){
+        $pending_vacations = 0;
+        $amount_vacations = 0;
+        $vacation_balance = $employee->vacationBalance;
+        if($vacation_balance){
+            $pending_vacations = $vacation_balance->available_days;
+        }
+        if($pending_vacations > 0){
+            $salary_for_days = $employee->salary / 30;
+            $amount_vacations = $pending_vacations * $salary_for_days;
+            $amount_vacations = round($amount_vacations, 2);
+        }
+        return $amount_vacations;
     }
 }
