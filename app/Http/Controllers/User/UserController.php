@@ -17,6 +17,7 @@ use App\Models\PayrollDeduction;
 use App\Models\PayrollBonu;
 use Illuminate\Support\Facades\DB;
 use App\Models\Bonu;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {

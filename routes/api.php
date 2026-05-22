@@ -70,3 +70,4 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('/reports/export', [ReportsController::class, 'exportExcel']);
+Route::get('/generate-payroll', [PayrollController::class, 'generatePayroll']);

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\PayrollDeduction;
 use App\Models\PayrollBonu;
 use App\Helpers\ApiResponse;
+use Illuminate\Support\Facades\Log;
 
 class PayrollController extends Controller
 {
@@ -28,8 +29,9 @@ class PayrollController extends Controller
 
     public function showByEmployee(Request $request, $employeeId)
     {
+        $employee = Employee::where('user_id', $employeeId)->first();
         $payrolls = Payroll::with(['employee', 'employee.user', 'employee.contractType', 'payrollType', 'payrollBonu', 'payrollDeduction', 'payrollDeduction.deduction', 'payrollBonu.bonus'])
-            ->where('employee_id', $employeeId)
+            ->where('employee_id', $employee->id)
             ->where('status', 2)
             ->whereBetween('period_start',  [Carbon::parse($request->period_start), Carbon::parse($request->period_end)])
             ->get();
@@ -52,6 +54,16 @@ class PayrollController extends Controller
     }
 
     public function store(Request $request)
+    {
+        try {
+            $payrolls = $this->createPayrolls($request);
+            return ApiResponse::success($payrolls, 'Nómina creada correctamente');
+        } catch (\Throwable $th) {
+            return ApiResponse::error(null, 'Error al crear la nómina. ' . $th->getMessage(), 500);
+        }
+    }
+
+    private function createPayrolls(Request $request): array
     {
         $payrolls = [];
         $employees = Employee::where('is_active', 1)
@@ -155,10 +167,10 @@ class PayrollController extends Controller
                 }
             }
             DB::commit();
-            return ApiResponse::success($payrolls, 'Nómina creada correctamente');
+            return $payrolls;
         } catch (\Throwable $th) {
             DB::rollBack();
-            return ApiResponse::error(null, 'Error al crear la nómina. ' . $th->getMessage(), 500);
+            throw $th;
         }
     }
 
@@ -189,4 +201,139 @@ class PayrollController extends Controller
         };
     }
 
+    public function generatePayroll()
+    {
+        $payrolls = [];
+        $employees = Employee::where('is_active', 1)->get();
+        $startDate = '2018-01-01';
+        $endDate = Carbon::now()->endOfMonth();
+
+        foreach ($employees as $employee) {
+            $hireDate = Carbon::parse($employee->hire_date);
+            $periods = $this->generatePayrollPeriods($employee->contract_type_id, $startDate, $endDate, $hireDate);
+            
+            foreach ($periods as $period) {
+                $request = new Request([
+                    'bonus' => ['1'],
+                    'contract_type_id' => strval($employee->contract_type_id),
+                    'deductions' => ['1', '2'],
+                    'payroll_type_id' => 1,
+                    'period_start' => $period['start'],
+                    'period_end' => $period['end'],
+                ]);
+                
+                try {
+                    $createdPayrolls = $this->createPayrolls($request);
+                    array_push($payrolls, ...$createdPayrolls);
+                } catch (\Throwable $th) {
+                    \Log::error('Error generando nómina: ' . $th->getMessage());
+                }
+            }
+        }
+        return ApiResponse::success($payrolls, 'Nómina generada correctamente');
+    }
+
+    private function generatePayrollPeriods($contractTypeId, $startDate, $endDate, $hireDate): array
+    {
+        $periods = [];
+        
+        if ($contractTypeId == 3) {
+            // Monthly: full month
+            $periods = $this->getMonthlyPeriods($startDate, $endDate, $hireDate);
+        } elseif ($contractTypeId == 2) {
+            // Biweekly: 1-15 and 16-end of month
+            $periods = $this->getBiweeklyPeriods($startDate, $endDate, $hireDate);
+        } elseif ($contractTypeId == 1) {
+            // Weekly: Monday to Sunday
+            $periods = $this->getWeeklyPeriods($startDate, $endDate, $hireDate);
+        }
+        
+        return $periods;
+    }
+
+    private function getMonthlyPeriods($startDate, $endDate, $hireDate): array
+    {
+        $periods = [];
+        $currentDate = Carbon::parse($startDate)->startOfMonth();
+        $endDate = Carbon::parse($endDate);
+        
+        while ($currentDate->lte($endDate)) {
+            if ($currentDate->gte($hireDate)) {
+                $periods[] = [
+                    'start' => $currentDate->toDateString(),
+                    'end' => $currentDate->endOfMonth()->toDateString(),
+                ];
+            }
+            $currentDate = $currentDate->endOfMonth()->addDay();
+        }
+        
+        return $periods;
+    }
+
+    private function getBiweeklyPeriods($startDate, $endDate, $hireDate): array
+    {
+        $periods = [];
+        $currentDate = Carbon::parse($startDate)->startOfMonth();
+        $endDate = Carbon::parse($endDate);
+        
+        while ($currentDate->lte($endDate)) {
+            // First period: 1st to 15th
+            $firstStart = $currentDate->copy();
+            $firstEnd = $currentDate->copy()->setDay(15);
+            
+            if ($firstStart->gte($hireDate) && $firstStart->lte($endDate)) {
+                $periods[] = [
+                    'start' => $firstStart->toDateString(),
+                    'end' => $firstEnd->toDateString(),
+                ];
+            }
+            
+            // Second period: 16th to end of month
+            $secondStart = $currentDate->copy()->setDay(16);
+            $secondEnd = $currentDate->copy()->endOfMonth();
+            
+            if ($secondStart->gte($hireDate) && $secondStart->lte($endDate)) {
+                $periods[] = [
+                    'start' => $secondStart->toDateString(),
+                    'end' => $secondEnd->toDateString(),
+                ];
+            }
+            
+            $currentDate = $currentDate->endOfMonth()->addDay();
+        }
+        
+        return $periods;
+    }
+
+    private function getWeeklyPeriods($startDate, $endDate, $hireDate): array
+    {
+        $periods = [];
+        $currentDate = Carbon::parse($startDate);
+        $endDate = Carbon::parse($endDate);
+        
+        // Adjust to start on Monday
+        if ($currentDate->dayOfWeek !== 1) { // 1 = Monday
+            $currentDate = $currentDate->startOfWeek();
+        }
+        
+        while ($currentDate->lte($endDate)) {
+            $weekStart = $currentDate->copy()->startOfWeek();
+            $weekEnd = $currentDate->copy()->endOfWeek();
+            
+            if ($weekEnd->gt($endDate)) {
+                $weekEnd = $endDate->copy();
+            }
+            
+            if ($weekStart->gte($hireDate)) {
+                $periods[] = [
+                    'start' => $weekStart->toDateString(),
+                    'end' => $weekEnd->toDateString(),
+                ];
+            }
+            
+            $currentDate = $currentDate->addWeek();
+        }
+        
+        return $periods;
+    }
 }
